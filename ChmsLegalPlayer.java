@@ -11,7 +11,7 @@ import org.ggp.base.util.statemachine.exceptions.TransitionDefinitionException;
 /** 
  * This is my first legal player
  * @date   26.10.2013
- * @author chms (forallx.ru)
+ * @author chms (http://forallx.ru)
  *
  */
 
@@ -37,13 +37,6 @@ public final class ChmsLegalPlayer extends SampleGamer {
 		// Important that stop < timeout
 		long stop = System.currentTimeMillis();
 		
-		/**
-		 * Эти функции используются другими частями УИП кодобазы
-		 * Вы не должны о них беспокоится, но убедитесь что у вас
-		 * есть список действий, выбранное действие, стоп и старт 
-		 * заданные как в этом примере и скопируйте-вставте эти две
-		 * строки в вашего игрока
-		 */
 		notifyObservers(new GamerSelectedMoveEvent(moves, selection, stop - start));
 		return selection;
 	}
