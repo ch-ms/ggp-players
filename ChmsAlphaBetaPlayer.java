@@ -13,13 +13,13 @@ import org.ggp.base.util.statemachine.exceptions.MoveDefinitionException;
 import org.ggp.base.util.statemachine.exceptions.TransitionDefinitionException;
 
 /**
- * This is my first minmax player
+ * This is my first minmax player with alpha-beta pruning
  * @date 03.11.2013
  * @author chms (http://forallx.ru)
  */
 
 
-public class ChmsMinmaxPlayer extends SampleGamer {
+public class ChmsAlphaBetaPlayer extends SampleGamer {
 	
 	// Roles of players
 	private Role opponent;
@@ -38,6 +38,8 @@ public class ChmsMinmaxPlayer extends SampleGamer {
 				opponent=role;
 			}
 		}
+		
+		System.out.println("===");
 
 		List<Move> moves = getStateMachine().getLegalMoves(getCurrentState(), me);
 		
@@ -61,7 +63,7 @@ public class ChmsMinmaxPlayer extends SampleGamer {
 		Move bestMove = moves.get(0); // assume that best move is first
 		Integer score = 0;
 		for(Move move : moves){
-			Integer result = getMinScore(move, getCurrentState());
+			Integer result = getMinScore(move, getCurrentState(), 0, 100);
 			outMoveScore(move, result);
 			if(result>score){
 				// if we find move with score greater than current bestMove
@@ -77,14 +79,15 @@ public class ChmsMinmaxPlayer extends SampleGamer {
 	 * Search min node for score
 	 * @param action
 	 * @param state 
+	 * @param alpha
+	 * @param beta
 	 * @return
 	 * @throws MoveDefinitionException 
 	 * @throws TransitionDefinitionException 
 	 * @throws GoalDefinitionException 
 	 */
-	private Integer getMinScore(Move action, MachineState state) throws MoveDefinitionException, TransitionDefinitionException, GoalDefinitionException {
+	private Integer getMinScore(Move action, MachineState state, Integer alpha, Integer beta) throws MoveDefinitionException, TransitionDefinitionException, GoalDefinitionException {
 		List<Move> moves = getStateMachine().getLegalMoves(state, opponent);
-		Integer score = 100;
 		for(Move move : moves){
 			List<Move> tryMove = new ArrayList<Move>();
 			// The action sequence is important in tryMove list
@@ -97,31 +100,34 @@ public class ChmsMinmaxPlayer extends SampleGamer {
 			}
 			
 			MachineState newState = getStateMachine().getNextState(state, tryMove);
-			Integer result = getMaxScore(newState);
-			if(result<score){ score=result; }
+			Integer maxval = getMaxScore(newState, alpha, beta);
+			beta = Math.min(beta, maxval);
+			if(beta<=alpha){ return alpha; }
 		}
-		return score;
+		return beta;
 	}
 
 	/***
 	 * Search max node for score
 	 * @param state
+	 * @param alpha
+	 * @param beta
 	 * @return
 	 * @throws GoalDefinitionException 
 	 * @throws MoveDefinitionException 
 	 * @throws TransitionDefinitionException 
 	 */
-	private Integer getMaxScore(MachineState state) throws GoalDefinitionException, MoveDefinitionException, TransitionDefinitionException {
+	private Integer getMaxScore(MachineState state, Integer alpha, Integer beta) throws GoalDefinitionException, MoveDefinitionException, TransitionDefinitionException {
 		if(getStateMachine().isTerminal(state)){
 			return getStateMachine().getGoal(state, me);
 		}else{
 			List<Move> moves = getStateMachine().getLegalMoves(state, me);
-			Integer score = 0;
 			for(Move move : moves){
-				Integer result = getMinScore(move, state);
-				if(result>score){ score = result; }
+				Integer minval = getMinScore(move, state, alpha, beta);
+				alpha = Math.max(alpha, minval);
+				if(alpha>=beta){ return beta; }
 			}
-			return score;
+			return alpha;
 		}
 	}
 	
